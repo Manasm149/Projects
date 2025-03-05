@@ -45,7 +45,18 @@ pen.color("white")
 pen.hideturtle()
 pen.goto(0,260)
 pen.write("Player A: 0 Player B : 0", align = "center", font = ("Courier",24,"normal"))
-
+def check_winner():
+    if score_a == 10:
+        pen.clear()
+        pen.goto(0, 0)
+        pen.write("Player A Wins!", align="center", font=("Courier", 36, "bold"))
+        return True
+    elif score_b == 10:
+        pen.clear()
+        pen.goto(0, 0)
+        pen.write("Player B Wins!", align="center", font=("Courier", 36, "bold"))
+        return True
+    return False
 #movements
 
 def paddle_a_up():
@@ -89,12 +100,14 @@ while True:
         score_a +=1 
         pen.clear()
         pen.write("Player A: {} Player B : {}".format(score_a,score_b), align = "center", font = ("Courier",24,"normal"))
+        check_winner();
     if ball.xcor() < -390:
         ball.goto(0,0)
         ball.dx *= -1
         score_b += 1
         pen.clear()
         pen.write("Player A: {} Player B : {}".format(score_a,score_b), align = "center", font = ("Courier",24,"normal"))
+        check_winner();
     ##paddle and ball collisions
     if (ball.xcor() > 340) and (ball.ycor() < paddle_b.ycor() +40) and (ball.ycor() > paddle_b.ycor() - 40 )and (ball.xcor() < 350):
         ball.dx *= -1
