@@ -1,133 +1,149 @@
-// AVL Tree Node
-class Node {
-    int key;
+import java.util.*;
+import java.lang.*;
+import java.io.*;
+class Node{
+    int val;
     Node left, right;
     int height;
-
-    public Node(int item) {
-        key = item;
-        left = right = null;
+    public Node(int item){
+        val = item;
         height = 1;
+        left = right = null;
     }
 }
-
-public class AVLTree {
+class AVLTree
+{
     private Node root;
-
-    // Get the height of the tree
-    private int height(Node node) {
-        if (node == null)
-            return 0;
+    private int height(Node node){
+        if(node == null) return 0;
         return node.height;
     }
-
-    // Get the balance factor of a node
-    private int getBalanceFactor(Node node) {
-        if (node == null)
-            return 0;
+    private int getBalanceFactor(Node node){
+        if(node == null) return 0;
         return height(node.left) - height(node.right);
     }
-
-    // Right rotate the subtree rooted with y
-    private Node rightRotate(Node y) {
+    private Node rightrotate(Node y){
         Node x = y.left;
-        Node T2 = x.right;
-
-        // Perform rotation
+        Node t2 = y.right;
+        //perform rotation
         x.right = y;
-        y.left = T2;
-
-        // Update heights
-        y.height = Math.max(height(y.left), height(y.right)) + 1;
-        x.height = Math.max(height(x.left), height(x.right)) + 1;
-
-        // Return new root
+        y.left = t2;
+        y.height = Math.max(height(y.left),height(y.right))+1;
+        x.height = Math.max(height(x.left),height(x.right))+1;
+        return x;
+        
+    }
+    private Node leftrotate(Node y){
+        Node x  = y.right;
+        Node t2 = y.left;
+        //perform rotation
+        x.left = y;
+        y.right = t2;
+        y.height = Math.max(height(y.left),height(y.right))+1;
+        x.height = Math.max(height(x.left),height(x.right))+1;
         return x;
     }
-
-    // Left rotate the subtree rooted with x
-    private Node leftRotate(Node x) {
-        Node y = x.right;
-        Node T2 = y.left;
-
-        // Perform rotation
-        y.left = x;
-        x.right = T2;
-
-        // Update heights
-        x.height = Math.max(height(x.left), height(x.right)) + 1;
-        y.height = Math.max(height(y.left), height(y.right)) + 1;
-
-        // Return new root
-        return y;
-    }
-
-    // Insert a key into the subtree rooted with node and return the new root
-    public Node insert(Node node, int key) {
-        // 1. Perform the normal BST insertion
-        if (node == null)
-            return new Node(key);
-
-        if (key < node.key)
-            node.left = insert(node.left, key);
-        else if (key > node.key)
-            node.right = insert(node.right, key);
-        else
-            return node; // Duplicate keys are not allowed
-
-        // 2. Update the height of this ancestor node
-        node.height = 1 + Math.max(height(node.left), height(node.right));
-
-        // 3. Get the balance factor of this ancestor node to check whether this node became unbalanced
-        int balance = getBalanceFactor(node);
-
-        // If this node becomes unbalanced, then there are 4 cases
-
-        // Left Left Case
-        if (balance > 1 && key < node.left.key)
-            return rightRotate(node);
-
-        // Right Right Case
-        if (balance < -1 && key > node.right.key)
-            return leftRotate(node);
-
-        // Left Right Case
-        if (balance > 1 && key > node.left.key) {
-            node.left = leftRotate(node.left);
-            return rightRotate(node);
-        }
-
-        // Right Left Case
-        if (balance < -1 && key < node.right.key) {
-            node.right = rightRotate(node.right);
-            return leftRotate(node);
-        }
-
-        // Return the (unchanged) node pointer
-        return node;
-    }
-
-    // Insert a key into the AVL Tree
     public void insert(int key) {
         root = insert(root, key);
     }
-
-    // Preorder traversal of the tree
+    private Node insert(Node node , int key){
+       //  step 1. to perform normal bst insertion
+       if(node == null) return new Node(key);
+       if(node.val >  key) node.left =  insert(node.left, key);
+       else if(node.val < key) node.right =  insert(node.right,key);
+       else return node;
+       // step 2: height Updation 
+       node.height = Math.max(height(node.left),height(node.right))+1;
+       int balance  = getBalanceFactor(node);
+       if(balance > 1 && key < node.left.val){ // this is the left left case and so we right rotate
+           return rightrotate(node);
+       }
+       if(balance < -1 && key > node.right.val){
+           return leftrotate(node);
+       }
+       // now we talk about the left right case 
+       if(balance > 1 && key  > node.left.val){
+           node.left  = leftrotate(node.left);
+           return rightrotate(node);
+    }
+        if(balance < -1 &&  key  < node.right.val){
+            node.right = rightrotate(node.right);
+            return leftrotate(node);
+        }
+        return node;
+    }
     public void preOrder(Node node) {
         if (node != null) {
-            System.out.print(node.key + " ");
+            System.out.print(node.val + " ");
             preOrder(node.left);
             preOrder(node.right);
         }
     }
-
-    // Wrapper for preOrder traversal
+    private Node minValueNode(Node node) {
+        Node current = node;
+        while (current.left != null) {
+            current = current.left;
+        }
+        return current;
+    }
     public void preOrder() {
         preOrder(root);
     }
-
-    public static void main(String[] args) {
-        AVLTree tree = new AVLTree();
+    public Node delete(Node node, int key){
+        if(node == null) return null;
+        if(key  < node.val){
+            node.left  = delete(node.left, key);
+        }
+        else if(key > node.val){
+            node.right = delete(node.right,key);
+    }
+        else{
+            // we first handle the case with no or 1 children
+            if(node.left == null || node.right == null){
+                Node temp = null;
+                if(node.left != null){
+                    temp  = node.left;
+                }
+                if(node.right != null){
+                    temp = node.right;
+                }
+                if(temp == null){
+                    node =  null;
+                }
+                else{
+                    node = temp;
+                }
+            }
+            else{
+            Node temp = minValueNode(node.right);
+            node.val = temp.val;
+            node.right = delete(node.right, temp.val);
+        }
+        }
+        if(node == null) return node;
+        node.height  = Math.max(height(node.left),height(node.right))+1;
+        int balance = getBalanceFactor(node);
+        if(balance > 1 && getBalanceFactor(node.left) >= 0){
+            return rightrotate(node);
+        }
+        if(balance < -1 && getBalanceFactor(node.right) <= 0){
+            return leftrotate(node);
+            }
+        if(balance > 1 && getBalanceFactor(node.left) < 0){
+            node.left = leftrotate(node.left);
+            return rightrotate(node);
+        }
+        if(balance < -1 && getBalanceFactor(node.right) > 0){
+            node.right  = rightrotate(node.right);
+            return leftrotate(node);
+        }
+        return node;
+    }
+    public void delete(int key) {
+        root = delete(root, key);
+    }
+	public static void main (String[] args) throws java.lang.Exception
+	{AVLTree tree = new AVLTree();
 
         // Inserting nodes
         tree.insert(10);
@@ -139,5 +155,12 @@ public class AVLTree {
         // Print preorder traversal of the AVL tree
         System.out.println("Preorder traversal of the constructed AVL tree:");
         tree.preOrder();
-    }
+         tree.delete(20);
+
+        // Print preorder traversal of the AVL tree after deletion
+        System.out.println("\nPreorder traversal of the AVL tree after deletion:");
+        tree.preOrder();
+
+
+	}
 }
